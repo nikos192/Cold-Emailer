@@ -37,14 +37,14 @@ cp .env.example .env.local
 | `OUTLOOK_EMAIL` | Your Outlook email address |
 | `OUTLOOK_APP_PASSWORD` | App password from Microsoft account security settings |
 | `OUTLOOK_FROM_NAME` | Display name for sent emails |
-| `KV_REST_API_URL` | From Vercel KV dashboard |
-| `KV_REST_API_TOKEN` | From Vercel KV dashboard |
+| `UPSTASH_REDIS_REST_URL` | From Upstash Redis dashboard |
+| `UPSTASH_REDIS_REST_TOKEN` | From Upstash Redis dashboard |
 
-### 3. Set up Vercel KV (for local dev)
+### 3. Set up Upstash Redis (for local dev)
 
-- Go to [vercel.com](https://vercel.com) → your project → **Storage** → **Create KV Store**
-- After creating, go to the KV store settings and copy the **REST API URL** and **REST API Token**
-- Add them to `.env.local`
+- Go to [console.upstash.com](https://console.upstash.com) → **Create Database** → choose a region
+- Under **REST API**, copy the **REST URL** and **REST Token**
+- Add them to `.env.local` as `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`
 
 ### 4. Run locally
 
@@ -75,10 +75,11 @@ git push origin main
 
 In Vercel project settings → **Environment Variables**, add all variables from `.env.example`.
 
-### 4. Link Vercel KV
+### 4. Add Upstash Redis to Vercel
 
-- In Vercel project → **Storage** → **Connect Store** → select your KV store
-- Vercel automatically injects `KV_REST_API_URL` and `KV_REST_API_TOKEN` — no need to add them manually if you connect the store
+- Go to [Vercel Marketplace → Upstash Redis](https://vercel.com/marketplace?category=storage&search=upstash)
+- Install the integration and connect your database to your Vercel project
+- Vercel automatically injects `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`
 
 ### 5. Deploy
 

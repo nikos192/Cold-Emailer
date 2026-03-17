@@ -1,4 +1,6 @@
-import { kv } from '@vercel/kv'
+import { Redis } from '@upstash/redis'
+
+const kv = Redis.fromEnv()
 import type { Lead, Template, Campaign } from '@/types'
 
 // ─── Leads ───────────────────────────────────────────────────────────────────
@@ -35,7 +37,7 @@ export async function getAllLeads(): Promise<Lead[]> {
   if (index.length === 0) return []
   const keys = index.map((id) => `lead:${id}`)
   // mget for efficiency
-  const leads = await kv.mget<Lead[]>(...keys)
+  const leads = await kv.mget<Lead>(...keys)
   return leads.filter((l): l is Lead => l !== null)
 }
 
