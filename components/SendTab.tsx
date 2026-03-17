@@ -55,10 +55,12 @@ export default function SendTab() {
 
   useEffect(() => () => stopPolling(), [stopPolling])
 
-  const pendingLeads  = leads.filter((l) => l.status === 'pending')
+  const sendableLeads = leads.filter((l) => l.email)   // must have email
+  const pendingLeads  = sendableLeads.filter((l) => l.status === 'pending')
   const emailedLeads  = leads.filter((l) => l.status === 'emailed')
   const skipLeads     = leads.filter((l) => l.status === 'skip')
-  const selectedLeads = leads.filter((l) => selected.has(l.id))
+  const noEmailLeads  = leads.filter((l) => !l.email)
+  const selectedLeads = sendableLeads.filter((l) => selected.has(l.id))
   const alreadyEmailedSelected = selectedLeads.filter((l) => l.status === 'emailed')
   const estimatedSeconds = selectedLeads.length > 1 ? (selectedLeads.length - 1) * delay : 0
   const exceedsLimit = estimatedSeconds > MAX_VERCEL_SECONDS
@@ -92,10 +94,10 @@ export default function SendTab() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Total leads',     value: leads.length,        color: 'text-[#e8e5e0]' },
-          { label: 'Not contacted',   value: pendingLeads.length,  color: 'text-[#e8e5e0]' },
+          { label: 'Total leads',     value: leads.length,         color: 'text-[#e8e5e0]' },
+          { label: 'Ready to send',   value: pendingLeads.length,  color: 'text-[#e8e5e0]' },
           { label: 'Already emailed', value: emailedLeads.length,  color: 'text-[#34d399]' },
-          { label: 'Skipped',         value: skipLeads.length,     color: 'text-[#f59e0b]' },
+          { label: 'No email yet',    value: noEmailLeads.length,  color: noEmailLeads.length > 0 ? 'text-[#f59e0b]' : 'text-[#8c909e]' },
         ].map(({ label, value, color }) => (
           <div key={label} className="bg-[#1d1e26] border border-[#30313e] rounded-xl p-4">
             <div className={`text-2xl font-semibold font-mono ${color}`}>{value}</div>
@@ -111,7 +113,7 @@ export default function SendTab() {
           <div className="flex gap-1.5">
             <button onClick={() => setSelected(new Set(pendingLeads.map((l) => l.id)))}
               className="text-xs px-3 py-1.5 bg-[#1d1e26] border border-[#30313e] rounded-lg text-[#8c909e] hover:text-[#e8e5e0] hover:border-[#7c6af5] transition-all">
-              Not contacted ({pendingLeads.length})
+              Ready to send ({pendingLeads.length})
             </button>
             <button onClick={() => setSelected(new Set())}
               className="text-xs px-3 py-1.5 text-[#8c909e] hover:text-[#e8e5e0] transition-colors rounded-lg hover:bg-[#252630]">
@@ -122,9 +124,13 @@ export default function SendTab() {
         <div className="border border-[#30313e] rounded-xl overflow-hidden max-h-64 overflow-y-auto">
           <table className="w-full">
             <tbody className="divide-y divide-[#27283380]">
-              {leads.length === 0 ? (
-                <tr><td className="px-4 py-8 text-center text-sm text-[#8c909e]">No leads yet. Import some in the Leads tab.</td></tr>
-              ) : leads.map((lead) => (
+              {sendableLeads.length === 0 ? (
+                <tr><td className="px-4 py-8 text-center text-sm text-[#8c909e]">
+                  {leads.length === 0
+                    ? 'No leads yet. Import some in the Leads tab.'
+                    : 'No leads have email addresses yet. Add emails in the Leads tab.'}
+                </td></tr>
+              ) : sendableLeads.map((lead) => (
                 <tr key={lead.id} onClick={() => toggleSelect(lead.id)}
                   className={`cursor-pointer transition-colors hover:bg-[#1d1e26] ${selected.has(lead.id) ? 'bg-[#7c6af508]' : 'bg-[#13141a]'}`}>
                   <td className="px-4 py-2.5">

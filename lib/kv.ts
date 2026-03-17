@@ -114,10 +114,13 @@ export async function getAllCampaigns(): Promise<Campaign[]> {
 // ─── Merge ────────────────────────────────────────────────────────────────────
 
 export function mergeTemplate(template: string, lead: Lead): string {
-  const firstName = (lead.name ?? '').split(' ')[0] ?? lead.name
+  // If no contact name, fall back to first word of business name
+  const firstName = lead.name
+    ? lead.name.split(' ')[0]
+    : (lead.business_name ?? '').split(' ')[0]
   return template
-    .replace(/\{\{first_name\}\}/g, firstName)
-    .replace(/\{\{business_name\}\}/g, lead.business_name)
-    .replace(/\{\{suburb\}\}/g, lead.suburb)
-    .replace(/\{\{trade\}\}/g, lead.trade)
+    .replace(/\{\{first_name\}\}/g, firstName ?? '')
+    .replace(/\{\{business_name\}\}/g, lead.business_name ?? '')
+    .replace(/\{\{suburb\}\}/g, lead.suburb ?? '')
+    .replace(/\{\{trade\}\}/g, lead.trade ?? '')
 }
