@@ -1,21 +1,22 @@
-import { createHash, randomBytes } from 'crypto'
+// Uses Web Crypto API — compatible with both Edge runtime and Node.js
 
 export const COOKIE_NAME = 'outreach_auth'
 
-export function hashPassword(password: string): string {
-  return createHash('sha256').update(password).digest('hex')
+async function sha256(input: string): Promise<string> {
+  const data = new TextEncoder().encode(input)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
 }
 
-export function generateSessionToken(): string {
-  return randomBytes(32).toString('hex')
-}
-
-export function getExpectedCookieValue(): string {
+export async function getExpectedCookieValue(): Promise<string> {
   const password = process.env.ADMIN_PASSWORD ?? ''
-  return createHash('sha256').update(`velory-session-${password}`).digest('hex')
+  return sha256(`velory-session-${password}`)
 }
 
-export function isValidSession(cookieValue: string | undefined): boolean {
+export async function isValidSession(cookieValue: string | undefined): Promise<boolean> {
   if (!cookieValue) return false
-  return cookieValue === getExpectedCookieValue()
+  const expected = await getExpectedCookieValue()
+  return cookieValue === expected
 }

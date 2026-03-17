@@ -37,8 +37,8 @@ export async function getAllLeads(): Promise<Lead[]> {
   if (index.length === 0) return []
   const keys = index.map((id) => `lead:${id}`)
   // mget for efficiency
-  const leads = await kv.mget<Lead>(...keys)
-  return leads.filter((l): l is Lead => l !== null)
+  const leads = await kv.mget<(Lead | null)[]>(...keys)
+  return (leads as (Lead | null)[]).filter((l): l is Lead => l !== null)
 }
 
 // ─── Template ─────────────────────────────────────────────────────────────────
